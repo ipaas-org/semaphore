@@ -1,0 +1,391 @@
+basePath: /api/v1
+definitions:
+  httpserver.CreateNewUser.HttpNewUserPostResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  httpserver.HttpError:
+    properties:
+      code:
+        example: 400
+        type: integer
+      details:
+        example: Bad Request With More Info
+        type: string
+      error_doc_url:
+        example: https://example.com/docs/errors/invalid_id
+        type: string
+      error_type:
+        example: invalid_id
+        type: string
+      instance:
+        example: /api/v1/users/1
+        type: string
+      is_error:
+        example: true
+        type: boolean
+      message:
+        example: Bad Request
+        type: string
+    type: object
+  httpserver.HttpLoginUserPost:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  httpserver.HttpNewUserPost:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+    type: object
+  httpserver.HttpSuccess:
+    properties:
+      code:
+        example: 200
+        type: integer
+      data: {}
+      is_error:
+        example: false
+        type: boolean
+      message:
+        example: OK
+        type: string
+    type: object
+  httpserver.HttpUnauthenticatedUser:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      pfp:
+        type: string
+    type: object
+  httpserver.HttpUpdateUserPost:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      password:
+        type: string
+    type: object
+  httpserver.LoginUser.HttpLoginUserPostResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  httpserver.RegeneratePfpUrl.HttpNewPfp:
+    properties:
+      new_pfp:
+        type: string
+    type: object
+  model.User:
+    properties:
+      email:
+        description: '`json:"email"`'
+        type: string
+      firstName:
+        description: '`json:"first_name"`'
+        type: string
+      id:
+        description: '`json:"id"`'
+        type: integer
+      isBanned:
+        description: '`json:"is_banned"`'
+        type: boolean
+      lastName:
+        description: '`json:"last_name"`'
+        type: string
+      password:
+        description: '`json:"password"`'
+        type: string
+      pfp:
+        description: '`json:"pfp"`'
+        type: string
+      role:
+        description: '`json:"role"`'
+        type: string
+      specialMagicalSecretField:
+        description: '`json:"special_magical_secret_field"`'
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: davidevanoncini2003@gmail.com
+    name: Vano2903
+    url: https://github.com/vano2903
+  description: User Management Service
+  title: Go Service Template
+  version: "1.0"
+paths:
+  /user/{id}:
+    get:
+      description: Get user from ID for unauthorized users
+      operationId: getUnauthorizedUser
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/httpserver.HttpSuccess'
+            - properties:
+                code:
+                  type: integer
+                data:
+                  $ref: '#/definitions/httpserver.HttpUnauthenticatedUser'
+                message:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+      summary: Get user from ID
+      tags:
+      - users
+  /user/all:
+    get:
+      description: Get all user for an unauthorized user
+      operationId: getAllUnauthorizedUser
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/httpserver.HttpSuccess'
+            - properties:
+                code:
+                  type: integer
+                data:
+                  items:
+                    $ref: '#/definitions/httpserver.HttpUnauthenticatedUser'
+                  type: array
+                message:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+      summary: Get all user
+      tags:
+      - users
+  /user/login:
+    post:
+      description: Login user given email and password
+      operationId: LoginUser
+      parameters:
+      - description: email and password
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/httpserver.HttpLoginUserPost'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/httpserver.HttpSuccess'
+            - properties:
+                code:
+                  type: integer
+                data:
+                  $ref: '#/definitions/httpserver.LoginUser.HttpLoginUserPostResponse'
+                message:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+      summary: Login
+      tags:
+      - users
+  /user/me:
+    get:
+      description: Get authenticated user info from jwt
+      operationId: GetUserInfo
+      parameters:
+      - default: Bearer xxx.xxx.xxx
+        description: jwt token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/httpserver.HttpSuccess'
+            - properties:
+                code:
+                  type: integer
+                data:
+                  $ref: '#/definitions/model.User'
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+      summary: Get user info
+      tags:
+      - users
+  /user/register:
+    post:
+      description: Register a new user
+      operationId: CreateNewUser
+      parameters:
+      - description: User Informations
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/httpserver.HttpNewUserPost'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/httpserver.HttpSuccess'
+            - properties:
+                code:
+                  type: integer
+                data:
+                  $ref: '#/definitions/httpserver.CreateNewUser.HttpNewUserPostResponse'
+                message:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+      summary: Register a new user
+      tags:
+      - users
+  /user/update:
+    post:
+      description: |-
+        Automatically regnerate user's profile picture
+        Normal user do not need to specify anything, admins can specify a userid to update
+      operationId: RegeneratePfpUrl
+      parameters:
+      - default: Bearer xxx.xxx.xxx
+        description: jwt token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: id of the user to update
+        in: path
+        name: userid
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/httpserver.HttpSuccess'
+            - properties:
+                code:
+                  type: integer
+                data:
+                  $ref: '#/definitions/httpserver.RegeneratePfpUrl.HttpNewPfp'
+                message:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpserver.HttpError'
+      summary: Regenerate user's pfp
+      tags:
+      - users
+swagger: "2.0"
