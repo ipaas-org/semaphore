@@ -12,8 +12,8 @@
 
 ## Introduction
 
-This is a simple example of how to use mvc pattern in golang.
-Some of the code is inspired by [everone/go-clean-template](https://github.com/evrone/go-clean-template) but since it was too complex for me, I made my own version.
+This service will handle the dynamic configuration for traefik and redirects to the user's containers.
+It will listen on a message queue and the message 
 
 ## What does the code do
 
